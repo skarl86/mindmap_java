@@ -13,12 +13,12 @@ import java.awt.Color;
  * @Date 		: 2014. 5. 12.
  * @Author 		: NCri
  */
-public class CanvasView extends View{
+public class MindMapView extends View{
 
 	/**
 	 * @param color
 	 */
-	public CanvasView(Color color) {
+	public MindMapView(Color color) {
 		super(color);
 		// TODO Auto-generated constructor stub
 	}
