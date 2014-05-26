@@ -6,6 +6,11 @@
  */
 package view;
 
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -35,16 +40,33 @@ import javax.swing.JMenuItem;
  * 배점은 3 > 2 > 1 순으로 높은 점수를 받게 될 것입니다.
  */
 public class MenuBar extends JMenuBar{
+	private static int _FILE = 0;
 	
-	public static JMenuBar init(){
-		return MenuBar.initWithMenus(null);
-	}
-	public static JMenuBar initWithMenus(String[] menus){
+	public static String OPEN = "열기";
+	public static String SAVE = "저장";
+	public static String SAVE_AS = "다른 이름으로 저장";
+	public static String CLOSE = "닫기";
+	
+	
+	public static JMenuBar getInstance(ActionListener listner){
 		JMenuBar menuBar = new MenuBar();
 		JMenu fileMenu = new JMenu("파일");
 		menuBar.add(fileMenu);
 		
-		fileMenu.add(new JMenuItem("New"));
+		ArrayList<JMenuItem> items = new ArrayList<JMenuItem>();
+		items.add(new JMenuItem(OPEN));
+		items.add(new JMenuItem(SAVE));
+		items.add(new JMenuItem(SAVE_AS));
+		items.add(new JMenuItem(CLOSE));
+
+		Map<Integer, ArrayList<JMenuItem>> kindOfMenu = new HashMap<Integer, ArrayList<JMenuItem>>();
+		kindOfMenu.put(_FILE, items);
+		
+		for (JMenuItem item : kindOfMenu.get(_FILE)){
+			fileMenu.add(item);
+			item.addActionListener(listner);
+		}
+		
 		return menuBar;		
 	}
 

@@ -6,9 +6,10 @@
  */
 package view;
 
-import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
@@ -29,17 +30,32 @@ public class AttributeView extends View {
 	/**
 	 * @param color
 	 */
-	public AttributeView(Color color) {
-		super(color);
+	public static final String FIELD_NAME_X = "X";
+	public static final String FIELD_NAME_Y = "Y";
+	public static final String FIELD_NAME_WIDTH = "WIDTH";
+	public static final String FIELD_NAME_HEIGHT = "HEIGHT";
+	public static final String FIELD_NAME_TEXT = "TEXT";
+	
+	private static final String BUTTON_NAME_CHANGE = "변경";
+	
+	public AttributeView(ActionListener listner) {
 		// TODO Auto-generated constructor stub
 
 		// Sample TEST Code
-		setLayout(new GridLayout(4, 2));
-		add(new JLabel("이름"));
+		setLayout(new GridLayout(6, 2));
+		add(new JLabel(FIELD_NAME_X));
 		add(new JTextField());
-		add(new JLabel("나이"));
+		add(new JLabel(FIELD_NAME_Y));
 		add(new JTextField());
-		
+		add(new JLabel(FIELD_NAME_WIDTH));
+		add(new JTextField());
+		add(new JLabel(FIELD_NAME_HEIGHT));
+		add(new JTextField());
+		add(new JLabel(FIELD_NAME_TEXT));
+		add(new JTextField());
+		JButton changeBtn = new JButton(BUTTON_NAME_CHANGE);
+		changeBtn.addActionListener(listner);
+		add(changeBtn);		
 	}
 
 }

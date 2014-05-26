@@ -6,7 +6,8 @@
  */
 package view;
 
-import java.awt.Color;
+import java.awt.event.ActionListener;
+
 
 /**
  * @Class		: CanvasView
@@ -14,13 +15,7 @@ import java.awt.Color;
  * @Author 		: NCri
  */
 public class MindMapView extends View{
-
-	/**
-	 * @param color
-	 */
-	public MindMapView(Color color) {
-		super(color);
-		// TODO Auto-generated constructor stub
+	public MindMapView(ActionListener listner){
+	
 	}
-
 }

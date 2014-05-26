@@ -11,6 +11,5 @@ package model;
  * @Date 		: 2014. 5. 12.
  * @Author 		: NCri
  */
-public class Model {
 
-}
+abstract public class Model{};
