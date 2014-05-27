@@ -2,9 +2,12 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,23 +29,13 @@ import controller.action.MenuAction;
  * @Author : NCri
  */
 public class MainView extends JFrame {
-
+	private static int _MENU_BAR_HEIGHT = 40;
+	private Map<Integer, View> _views = new HashMap<Integer, View>();
 	/**
 	 * 
+	 * @param listner
 	 */
-	private static final long serialVersionUID = 1L;
-
-	// 
-	private ArrayList<View> _views;
-	
-	// Key : Class Name | Value : View's Rectangle
-	private final Map<String, Rectangle> _viewBounds = new HashMap<String, Rectangle>();
-	
-	private final int _MENU_BAR_HEIGHT = 40;
-	/**
-	 * 
-	 */
-	public MainView(ActionListener listner) {
+	public MainView(EventListener listner) {
 		// TODO Auto-generated constructor stub
 		
 		// Set Main Frame Size
@@ -58,28 +51,59 @@ public class MainView extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		// Set MenuBar
-		setJMenuBar(MenuBar.getInstance(listner));
+		setJMenuBar(MenuBar.getInstance((ActionListener)listner));
 		
 		// Set Layout
 		// Layout 을 수동으로 처리 하기 위해서.
 		setLayout(null);
 
-		// Set Bounds
+		// Set Bounds of All View		
+		// 가독성을 위해서 변수로 접근.
+		Rectangle mainFrameBounds = getBounds();		
+		Rectangle toolBarBounds = new Rectangle(
+				0, 0, 
+				mainFrameBounds.width, 30);
+		
+		Rectangle attributeBounds = new Rectangle(
+				0, mainFrameBounds.x + toolBarBounds.getBounds().height,
+				250, mainFrameBounds.height - (toolBarBounds.getBounds().height) - _MENU_BAR_HEIGHT); 
+		
+		Rectangle mindMapBounds = new Rectangle(
+				attributeBounds.width, attributeBounds.y,
+				mainFrameBounds.width - attributeBounds.width, attributeBounds.height);
+		
 		// init Tool Bar
 		View toolBar = View.getInstance(View.TOOL_BAR, listner);
-		_viewBounds.put(toolBar.toString(), new Rectangle(0, 0, getBounds().width, 30));
-		toolBar.setBounds(_viewBounds.get(toolBar.toString()));
+		toolBar.setBounds(toolBarBounds);
 		add(toolBar, BorderLayout.PAGE_START);
+		_views.put(View.TOOL_BAR, toolBar);
 		
 		// init Attribute View
 		View attrView = View.getInstance(View.ATTRIBUTE, listner);
-		_viewBounds.put(attrView.toString(), new Rectangle(0, toolBar.getBounds().height,
-				250, getBounds().height - (toolBar.getBounds().height) - _MENU_BAR_HEIGHT));
-		attrView.setBounds(_viewBounds.get(attrView.toString()));
+		attrView.setBounds(attributeBounds);
 		add(attrView, BorderLayout.WEST);
+		_views.put(View.ATTRIBUTE, attrView);
 		
+		// init MindMap View
+		View mindMapView = View.getInstance(View.MIND_MAP, listner);
+		mindMapView.setBackground(Color.LIGHT_GRAY);
+		mindMapView.setBounds(mindMapBounds);
+		add(mindMapView);
+		_views.put(View.MIND_MAP, mindMapView);
 		
 		// Set Attribute
 		setVisible(true);
+	}
+	/**
+	 * 
+	 * @method Name	: getView
+	 * @date   		: 2014. 5. 26. 
+	 * @author   	: NCri
+	 * @description :
+	 * @param type
+	 * @return
+	 */
+	public View getView(int type){
+		return _views.get(type);		
 	}
 }

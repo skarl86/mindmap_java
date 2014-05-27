@@ -8,6 +8,7 @@ package view;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.util.EventListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -36,9 +37,9 @@ public class AttributeView extends View {
 	public static final String FIELD_NAME_HEIGHT = "HEIGHT";
 	public static final String FIELD_NAME_TEXT = "TEXT";
 	
-	private static final String BUTTON_NAME_CHANGE = "변경";
+	public static final String BUTTON_NAME_CHANGE = "변경";
 	
-	public AttributeView(ActionListener listner) {
+	public AttributeView(EventListener listner) {
 		// TODO Auto-generated constructor stub
 
 		// Sample TEST Code
@@ -54,7 +55,7 @@ public class AttributeView extends View {
 		add(new JLabel(FIELD_NAME_TEXT));
 		add(new JTextField());
 		JButton changeBtn = new JButton(BUTTON_NAME_CHANGE);
-		changeBtn.addActionListener(listner);
+		changeBtn.addActionListener((ActionListener)listner);
 		add(changeBtn);		
 	}
 

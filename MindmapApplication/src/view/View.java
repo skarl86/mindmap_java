@@ -7,7 +7,10 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Event;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseMotionListener;
+import java.util.EventListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -28,12 +31,12 @@ abstract public class View extends JPanel{
 	public static final int ATTRIBUTE = 1;
 	public static final int TOOL_BAR = 2;
 	
-	protected ActionListener _listner;
+	protected EventListener _listner;
 	
 	public View(){
 		setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
-	public View(ActionListener listner){
+	public View(EventListener listner){
 		super();
 		this._listner = listner;
 	}
@@ -41,8 +44,7 @@ abstract public class View extends JPanel{
 		super();
 		setBackground(color);
 	}
-	
-	public static View getInstance(int type, ActionListener listner){
+	public static View getInstance(int type, EventListener listner){
 		View instance = null;
 		if(type == View.MIND_MAP){
 			instance = new MindMapView(listner);

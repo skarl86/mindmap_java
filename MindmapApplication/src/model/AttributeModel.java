@@ -8,6 +8,8 @@ package model;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * 요구사항.
@@ -76,6 +78,24 @@ public class AttributeModel extends Model {
 	
 	public String getText(){
 		return _text;
+	}
+
+	/* (non-Javadoc)
+	 * @see model.Model#getData(java.util.Map)
+	 */
+	@Override
+	public Map getData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see model.Model#getAllOfData(java.util.ArrayList)
+	 */
+	@Override
+	public ArrayList<Model> getAllOfData() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

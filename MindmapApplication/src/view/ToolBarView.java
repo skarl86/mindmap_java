@@ -8,6 +8,7 @@ package view;
 
 import java.awt.event.ActionListener;
 import java.net.URL;
+import java.util.EventListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -20,18 +21,22 @@ import javax.swing.JToolBar;
  */
 public class ToolBarView extends View{
     
-	public ToolBarView(ActionListener listner){
+	public ToolBarView(EventListener listner){
 //		super(new BorderLayout());
 
 		// init JToolbar 
 		JToolBar toolBar = new JToolBar();
 		
         //Create the Button
-        addButtons(toolBar, listner);
+        addButtons(toolBar, (ActionListener)listner);
         
         //
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
+
+        // Seperator
+        toolBar.addSeparator();
+        
         // Add JToolBar
         add(toolBar);
 	}
