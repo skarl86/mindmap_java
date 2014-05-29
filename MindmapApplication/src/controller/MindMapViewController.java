@@ -14,10 +14,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import view.AttributeView;
 import view.MainView;
@@ -68,10 +72,17 @@ public class MindMapViewController extends ViewController implements ActionListe
 //		System.out.println("紐⑤뱺 �≪뀡��Controller 媛�泥섎━�쒕떎.");
 		System.out.println(e.getActionCommand());
 		if(MenuBar.OPEN.equals(e.getActionCommand())){
-			JFrame open_file = new JFrame();
-			open_file.setTitle("열기");
-			open_file.setSize(500,300);
-			open_file.setVisible(true);
+			JFileChooser chooser = new JFileChooser("C:/");
+			FileFilter filter = new FileNameExtensionFilter("XML files", "XML");
+			chooser.addChoosableFileFilter(filter);
+			
+			int value = chooser.showOpenDialog(null);
+			if(value == JFileChooser.APPROVE_OPTION){
+				System.out.println("방금 선택하신 파일 : "+chooser.getSelectedFile().getName());
+				File file = chooser.getSelectedFile();
+				System.out.println("파일이 있는 디렉토리 : "+file);
+			}
+			
 		}else if(MenuBar.SAVE.equals(e.getActionCommand())){
 			System.out.println("硫붾돱&�대컮 �뚯씪 ��옣.");
 		}else if(MenuBar.SAVE_AS.equals(e.getActionCommand())){
