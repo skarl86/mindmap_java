@@ -21,11 +21,11 @@ import javax.swing.JTextField;
  */
 
 /**
- * 요구사항.
- * [속성]				[SWING 컴포넌트]
- * 시작 x, y 좌표 		JLabel, JTextField 
- * 너비, 높이 			JLabel, JTextField 
- * (노드) 텍스트 		JLabel, JTextField 
+ * �붽뎄�ы빆.
+ * [�띿꽦]				[SWING 而댄룷�뚰듃]
+ * �쒖옉 x, y 醫뚰몴 		JLabel, JTextField 
+ * �덈퉬, �믪씠 			JLabel, JTextField 
+ * (�몃뱶) �띿뒪��		JLabel, JTextField 
  */
 public class AttributeView extends View {
 	/**
@@ -43,19 +43,47 @@ public class AttributeView extends View {
 		// TODO Auto-generated constructor stub
 
 		// Sample TEST Code
-		setLayout(new GridLayout(6, 2));
-		add(new JLabel(FIELD_NAME_X));
-		add(new JTextField());
-		add(new JLabel(FIELD_NAME_Y));
-		add(new JTextField());
-		add(new JLabel(FIELD_NAME_WIDTH));
-		add(new JTextField());
-		add(new JLabel(FIELD_NAME_HEIGHT));
-		add(new JTextField());
-		add(new JLabel(FIELD_NAME_TEXT));
-		add(new JTextField());
+		GridLayout grid = new GridLayout(6, 2);
+		//setLayout(new GridLayout(6, 2));
+		grid.setVgap(70); 
+
+		setLayout(null);
+		JLabel label1 = new JLabel(FIELD_NAME_X);
+		JTextField text1= new JTextField();
+		JLabel label2 = new JLabel(FIELD_NAME_Y);
+		JTextField text2= new JTextField();
+		JLabel label3 = new JLabel(FIELD_NAME_WIDTH);
+		JTextField text3= new JTextField();
+		JLabel label4 = new JLabel(FIELD_NAME_HEIGHT);
+		JTextField text4= new JTextField();
+		JLabel label5 = new JLabel(FIELD_NAME_TEXT);
+		JTextField text5= new JTextField();
+		
+		label1.setBounds(35,20,50,20);
+		text1.setBounds(70,20,150,20);
+		label2.setBounds(35,50,50,20);
+		text2.setBounds(70,50,150,20);
+		label3.setBounds(20,80,50,20);
+		text3.setBounds(70,80,150,20);
+		label4.setBounds(20,110,50,20);
+		text4.setBounds(70,110,150,20);
+		label5.setBounds(25,140,50,20);
+		text5.setBounds(70,140,150,20);
+		
+		add(label1);
+		add(text1);
+		add(label2);
+		add(text2);
+		add(label3);
+		add(text3);
+		add(label4);
+		add(text4);
+		add(label5);
+		add(text5);
+		
 		JButton changeBtn = new JButton(BUTTON_NAME_CHANGE);
 		changeBtn.addActionListener((ActionListener)listner);
+		changeBtn.setBounds(80,170, 80, 40);
 		add(changeBtn);		
 	}
 

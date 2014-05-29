@@ -9,6 +9,8 @@ package controller.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JFrame;
+
 import view.MenuBar;
 
 /**
@@ -45,7 +47,7 @@ public class MenuAction implements ActionListener {
 	}
 
 	public void openMindMap() {
-
+		
 	}
 
 	public void saveAsMindMap() {

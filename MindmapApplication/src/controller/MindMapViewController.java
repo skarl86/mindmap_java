@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.JFrame;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -38,7 +39,7 @@ public class MindMapViewController extends ViewController implements ActionListe
 	
 	private Point _pressedPoint;
 	
-	// 팝업 메뉴가 실행된 Node 값을 저장할 변수.
+	// �앹뾽 硫붾돱媛��ㅽ뻾��Node 媛믪쓣 ��옣��蹂�닔.
 	private MapNode _selectedMapNode;
 	public MindMapViewController(){
 		_mainFrame = new MainView(this);
@@ -59,33 +60,36 @@ public class MindMapViewController extends ViewController implements ActionListe
 		ViewController vc = ViewController.getInstance(MIND_MAP);
 	}
 	/* 
-	 * 버튼 액션 이벤트를 전달 받는다.
+	 * 踰꾪듉 �≪뀡 �대깽�몃� �꾨떖 諛쏅뒗��
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-//		System.out.println("모든 액션은 Controller 가 처리한다.");
+//		System.out.println("紐⑤뱺 �≪뀡��Controller 媛�泥섎━�쒕떎.");
 		System.out.println(e.getActionCommand());
 		if(MenuBar.OPEN.equals(e.getActionCommand())){
-			System.out.println("메뉴&툴바 파일 열기.");			
+			JFrame open_file = new JFrame();
+			open_file.setTitle("열기");
+			open_file.setSize(500,300);
+			open_file.setVisible(true);
 		}else if(MenuBar.SAVE.equals(e.getActionCommand())){
-			System.out.println("메뉴&툴바 파일 저장.");
+			System.out.println("硫붾돱&�대컮 �뚯씪 ��옣.");
 		}else if(MenuBar.SAVE_AS.equals(e.getActionCommand())){
-			System.out.println("메뉴&툴 바 파일 다른 이름으로 저장.");
+			System.out.println("硫붾돱&��諛��뚯씪 �ㅻⅨ �대쫫�쇰줈 ��옣.");
 		}else if(MenuBar.CLOSE.equals(e.getActionCommand())){
-			System.out.println("메뉴&툴 바 프로그램 닫기.");
+			System.out.println("硫붾돱&��諛��꾨줈洹몃옩 �リ린.");
 		}else if(AttributeView.BUTTON_NAME_CHANGE.equals(e.getActionCommand())){
-			System.out.println("속성 뷰 변경.");
+			System.out.println("�띿꽦 酉�蹂�꼍.");
 		}else if(PopUpMenu.ACTION_NODE_CREATE.equals(e.getActionCommand())){
-			System.out.println("마인드 맵 팝업 메뉴 - 생성.");
-			// 노드 생성.
+			System.out.println("留덉씤��留��앹뾽 硫붾돱 - �앹꽦.");
+			// �몃뱶 �앹꽦.
 			MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
 			mapView.addMapNode(_willNodePoint);
 			
 		}else if(PopUpMenu.ACTION_NODE_LINK_CREATE.equals(e.getActionCommand())){
-			System.out.println("마인드 맵 팝업 메뉴 - 링크 연결.");
+			System.out.println("留덉씤��留��앹뾽 硫붾돱 - 留곹겕 �곌껐.");
 		}else if(PopUpMenu.ACTION_NODE_DELETE.equals(e.getActionCommand())){
-			System.out.println("마인드 맵 팝업 메뉴 - 삭제.");
+			System.out.println("留덉씤��留��앹뾽 硫붾돱 - ��젣.");
 			MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
 			mapView.removeMapNode(_selectedMapNode);
 		}
@@ -140,7 +144,7 @@ public class MindMapViewController extends ViewController implements ActionListe
 		// TODO Auto-generated method stub
 		System.out.println(e);
 		if(e.getSource() instanceof MapNode){
-			System.out.println("포인트 저장.");
+			System.out.println("�ъ씤����옣.");
 			_pressedPoint = e.getPoint();
 		}
 		
@@ -160,7 +164,7 @@ public class MindMapViewController extends ViewController implements ActionListe
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getSource() instanceof MapNode){
-			System.out.println("포인트 갱신.");
+			System.out.println("�ъ씤��媛깆떊.");
 			int diffX = _pressedPoint.x - e.getPoint().x;
 			int diffY = _pressedPoint.y - e.getPoint().y;
 			
