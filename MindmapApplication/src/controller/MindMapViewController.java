@@ -181,11 +181,12 @@ public class MindMapViewController extends ViewController implements
 			}
 
 		} else if (MenuBar.SAVE.equals(e.getActionCommand())) {
-			System.out.println("硫붾돱&�대컮 �뚯씪 ��옣.");
+			System.out.println("저장.");
 		} else if (MenuBar.SAVE_AS.equals(e.getActionCommand())) {
-			System.out.println("硫붾돱&��諛��뚯씪 �ㅻⅨ �대쫫�쇰줈 ��옣.");
+			System.out.println("다른 이름으로 저장.");
 		} else if (MenuBar.CLOSE.equals(e.getActionCommand())) {
-			System.out.println("硫붾돱&��諛��꾨줈洹몃옩 �リ린.");
+			System.out.println("닫기.");
+			System.exit(0);
 		} else if (AttributeView.BUTTON_NAME_CHANGE
 				.equals(e.getActionCommand())) {
 			System.out.println("상태 변경.");
@@ -250,9 +251,12 @@ public class MindMapViewController extends ViewController implements
 				_selectedMapNode.setSelected(true);
 				refreshStatus(_selectedMapNode);
 			} else {
+				// MinpMap View 부분을 클릭했을 때 선택된 노드를 풀어줘야한다.
 				if (_selectedMapNode != null) {
 					_selectedMapNode.setSelected(false);
 					_selectedMapNode = null;
+					// refreshStatus 시 null을 넘기면 상태 뷰의 값이
+					// 다 사라진다.
 					refreshStatus(_selectedMapNode);
 				}
 			}
