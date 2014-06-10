@@ -8,24 +8,30 @@ package model;
 
 import java.util.ArrayList;
 
+import view.MapNode;
+
 /**
- * @Class		: Tree
+ * @Class		: Node
  * @Date 		: 2014. 5. 27.
  * @Author 		: NCri
  */
 public class Node {
-	private int _capacity = 0;
+	
+	// Node 데이터 형태.
 	private int _x;
 	private int _y;
 	private String _text;
-	private ArrayList<Object> _childs;
-	private int _count;
 	
-	public Node(int capacity){
-		_capacity = capacity;
-		_childs = new ArrayList<Object>();
+	private ArrayList<Node> _childs;
+	
+	public Node(MapNode node){
+		_x = node.getLocation().x;
+		_y = node.getLocation().y;
+		_text = node.getText();
 	}
-	
+	public boolean addChild(Node node){
+		return _childs.add(node);
+	}
 	/**
 	 * 
 	 * @method Name	: addChild
@@ -35,16 +41,8 @@ public class Node {
 	 * @param node
 	 * @return
 	 */
-	public boolean addChild(Node node){
-		if(isFull()){
-			return false;
-		}
-		
-		_childs.add(node);
-		_count++;
-		
-		return true;
-		
+	public boolean addChild(MapNode node){
+		return _childs.add(new Node(node));		
 	}
 	
 	/**
@@ -56,10 +54,7 @@ public class Node {
 	 * @param node
 	 * @return
 	 */
-	public boolean removeChild(Node node){
-		if(isEmpty()){
-			return false;
-		}
+	public boolean removeChild(MapNode node){
 		return _childs.remove(node);
 	}
 	
@@ -75,16 +70,8 @@ public class Node {
 		return _childs.isEmpty();
 	}
 	
-	/**
-	 * 
-	 * @method Name	: isFull
-	 * @date   		: 2014. 5. 27. 
-	 * @author   	: NCri
-	 * @description :
-	 * @return
-	 */
-	public boolean isFull(){
-		return _count == _capacity;
+	public ArrayList<Node> getChilds(){
+		return _childs;
 	}
 
 	/**
