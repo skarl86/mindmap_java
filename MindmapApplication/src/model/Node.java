@@ -6,6 +6,7 @@
  */
 package model;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import view.MapNode;
@@ -18,31 +19,27 @@ import view.MapNode;
 public class Node {
 	
 	// Node 데이터 형태.
-	private int _x;
-	private int _y;
+	private Rectangle _bound;
 	private String _text;
+	private Node _parentNode;
 	
-	private ArrayList<Node> _childs;
+	private ArrayList<Node> _childs = new ArrayList<Node>();
 	
-	public Node(MapNode node){
-		_x = node.getLocation().x;
-		_y = node.getLocation().y;
-		_text = node.getText();
+	public Node(Rectangle bound, String inputText){
+		_bound = bound;
+		_text = inputText;
 	}
+	
+	public void setParentNode(Node parent){
+		_parentNode = parent;
+	}
+	
+	public Node getParentNode(){
+		return _parentNode;
+	}
+	
 	public boolean addChild(Node node){
 		return _childs.add(node);
-	}
-	/**
-	 * 
-	 * @method Name	: addChild
-	 * @date   		: 2014. 5. 27. 
-	 * @author   	: NCri
-	 * @description :
-	 * @param node
-	 * @return
-	 */
-	public boolean addChild(MapNode node){
-		return _childs.add(new Node(node));		
 	}
 	
 	/**
@@ -83,7 +80,7 @@ public class Node {
 	 * @return
 	 */
 	public int getX() {
-		return _x;
+		return _bound.x;
 	}
 
 	/**
@@ -95,9 +92,16 @@ public class Node {
 	 * @return
 	 */
 	public int getY() {
-		return _y;
+		return _bound.y;
 	}
 
+	public int getWidth(){
+		return _bound.width;
+	}
+	
+	public int getHeight(){
+		return _bound.height;
+	}
 	/**
 	 * 
 	 * @method Name	: getText
@@ -110,6 +114,13 @@ public class Node {
 		return _text;
 	}
 
+	public Rectangle getBounds(){
+		return _bound;
+	}
+	
+	public void setBounds(Rectangle bound){
+		_bound = bound;
+	}
 	/**
 	 * 
 	 * @method Name	: setX
@@ -119,7 +130,7 @@ public class Node {
 	 * @param x
 	 */
 	public void setX(int x) {
-		_x = x;
+		_bound.x = x;
 	}
 
 	/**
@@ -131,9 +142,17 @@ public class Node {
 	 * @param y
 	 */
 	public void setY(int y) {
-		_y = y;
+		_bound.y = y;
+	}
+	
+	public void setWidth(int width){
+		_bound.width = width;
 	}
 
+	public void setHeight(int height){
+		_bound.height = height;
+	}
+	
 	/**
 	 * 
 	 * @method Name	: setText

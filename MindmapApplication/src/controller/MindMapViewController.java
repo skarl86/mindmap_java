@@ -48,14 +48,15 @@ public class MindMapViewController extends ViewController implements
 	}
 
 	private MainView _mainFrame;
-	
+
 	private Point _selectedNodePoint;
 	private Point _pressedPoint;
-	
+
+	// 마인드 맵의 Root 노드들을 가지고 있는 리스트.
 	private ArrayList<MapNode> _rootList = new ArrayList<MapNode>();
 
-	// 루트 MapNode 를 가지고 있는 List.
-	Map<Point, MapNode> mapNodeTable = new HashMap<Point, MapNode>();
+	// MapNode View 와 Model 객체를 맵핑 시켜줄 테이블.
+	private Map<MapNode, Node> _nodeMappingTable = new HashMap<MapNode, Node>();
 
 	// 현재 선택 된 MapNode의 레퍼런스 변수.
 	private MapNode _selectedMapNode;
@@ -73,10 +74,10 @@ public class MindMapViewController extends ViewController implements
 
 		// Add MapNode Object in MindMapView.
 		MapNode newMapNode = mapView.addMapNode(newNodePoint);
-		
-		_rootList.add(newMapNode);
-		mapView.setRootList(_rootList);
-		
+		Node newNode = new Node(newMapNode.getBounds(), newMapNode.getText());
+	
+		// MapNode View에 해당하는 Node Model 객체를 맵핑 시켜준다.
+		_nodeMappingTable.put(newMapNode, newNode);
 		return newMapNode;
 	}
 
@@ -107,6 +108,12 @@ public class MindMapViewController extends ViewController implements
 
 		// Do Link new MapNode Object to selected MapNode Object.
 		_selectedMapNode.addChild(willLinkNode);
+
+		// MapNode View에 해당하는 Model 객체도 동기화 시켜준다.
+		Node newNode = _nodeMappingTable.get(willLinkNode);
+		Node selectedMapNodeModel = _nodeMappingTable.get(_selectedMapNode);
+		selectedMapNodeModel.addChild(newNode);
+		
 		// TEST Code.
 		willLinkNode.setBackground(Color.BLUE);
 	}
@@ -117,22 +124,37 @@ public class MindMapViewController extends ViewController implements
 		MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
 
 		// If it haven't childs, remove itself.
-		if(mapNode.getChilds().size() == 0){
+		if (mapNode.getChilds().size() == 0) {
 			mapNode.getParentMapNode().removeChild(mapNode);
 			mapView.removeMapNode(mapNode);
 			return;
 		}
-		
-		ArrayList<MapNode> copyList = (ArrayList<MapNode>) mapNode.getChilds().clone();
+
+		ArrayList<MapNode> copyList = (ArrayList<MapNode>) mapNode.getChilds()
+				.clone();
 
 		// To remove child MapNode Object.
-		for(MapNode childMapNode : copyList){
+		for (MapNode childMapNode : copyList) {
 			removeMapNode(childMapNode);
 		}
-		
+
 		mapView.removeMapNode(mapNode);
+		mapNode.getParentMapNode().removeChild(mapNode);
 	}
 
+	public void refreshStatus(MapNode selectedNode){
+		AttributeView attrView = (AttributeView) _mainFrame.getView(View.ATTRIBUTE);
+		
+		if (selectedNode == null){
+			attrView.changeStatus(null);
+			return;
+		}
+		
+		Node changedNode = _nodeMappingTable.get(selectedNode);
+		changedNode.setBounds(selectedNode.getBounds());
+		changedNode.setText(selectedNode.getText());
+		attrView.changeStatus(changedNode);
+	}
 	public static void main(String[] args) {
 		ViewController vc = ViewController.getInstance(MIND_MAP);
 	}
@@ -166,7 +188,19 @@ public class MindMapViewController extends ViewController implements
 			System.out.println("硫붾돱&��諛��꾨줈洹몃옩 �リ린.");
 		} else if (AttributeView.BUTTON_NAME_CHANGE
 				.equals(e.getActionCommand())) {
-			System.out.println("�띿꽦 酉�蹂�꼍.");
+			System.out.println("상태 변경.");
+			if(_selectedMapNode != null){
+				AttributeView attrView = (AttributeView)_mainFrame.getView(View.ATTRIBUTE);
+				Node currentStatus = attrView.getStatus();
+				
+				_nodeMappingTable.put(_selectedMapNode, currentStatus);
+				_selectedMapNode.setBounds(currentStatus.getBounds());
+				_selectedMapNode.setText(currentStatus.getText());
+				
+				// 위치가 변경되면서 선의 위치도 변경되어야 한다.
+				MindMapView mapView = (MindMapView)_mainFrame.getView(MIND_MAP);
+				mapView.repaint();	
+			}
 		} else if (PopUpMenu.ACTION_NODE_CREATE.equals(e.getActionCommand())) {
 			createNewNode(_selectedNodePoint);
 
@@ -194,10 +228,12 @@ public class MindMapViewController extends ViewController implements
 
 		if (MouseEvent.BUTTON3 == e.getButton()) {
 			System.out.println(e.getSource());
-
 			int popMenuType = -1;
 			if (e.getSource() instanceof MapNode) {
+				if(_selectedMapNode != null)
+					_selectedMapNode.setSelected(false);
 				_selectedMapNode = (MapNode) e.getSource();
+				_selectedMapNode.setSelected(true);
 				popMenuType = PopUpMenu.TYPE_NODE_MENU2;
 			} else if (e.getSource() instanceof MindMapView) {
 				popMenuType = PopUpMenu.TYPE_NODE_MENU1;
@@ -205,6 +241,21 @@ public class MindMapViewController extends ViewController implements
 
 			PopUpMenu pop = new PopUpMenu(popMenuType, this);
 			pop.show(e.getComponent(), e.getX(), e.getY());
+		} else if (MouseEvent.BUTTON1 == e.getButton()) {
+			if (e.getSource() instanceof MapNode) {
+				// 기존의 선택 된 MapNode를 토글 해줘야 한다.
+				if(_selectedMapNode != null)
+					_selectedMapNode.setSelected(false);
+				_selectedMapNode = (MapNode) e.getSource();
+				_selectedMapNode.setSelected(true);
+				refreshStatus(_selectedMapNode);
+			} else {
+				if (_selectedMapNode != null) {
+					_selectedMapNode.setSelected(false);
+					_selectedMapNode = null;
+					refreshStatus(_selectedMapNode);
+				}
+			}
 		}
 
 	}
@@ -276,6 +327,14 @@ public class MindMapViewController extends ViewController implements
 			Rectangle curBounds = node.getBounds();
 			node.setBounds(curBounds.x - diffX, curBounds.y - diffY,
 					curBounds.width, curBounds.height);
+
+			// 상태값 변경.
+			refreshStatus(node);
+			
+			// 선 모양을 갱신하기 위해서.
+			MindMapView mapView = (MindMapView) _mainFrame
+					.getView(View.MIND_MAP);
+			mapView.repaint();
 		}
 	}
 

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 /**
  * @Class		: NodeView
@@ -74,8 +76,8 @@ public class MapNode extends JLabel{
 	 * @return
 	 */
 	public MapNode addChild(MapNode child){
-		if(_count == _LIMIT_CHILDS_COUNT)
-			return null;
+//		if(_count == _LIMIT_CHILDS_COUNT)
+//			return null;
 		child.setParentMapNode(this);
 		_childs.add(child);
 		_count++;
@@ -111,5 +113,11 @@ public class MapNode extends JLabel{
 	public ArrayList<MapNode> getChilds(){		
 		return _childs;
 		
+	}
+	
+	public void setSelected(boolean isSelected){
+		if(isSelected){
+			setBorder(new LineBorder(Color.RED));
+		}else setBorder(new EmptyBorder(0, 0, 0, 0));
 	}
 }
