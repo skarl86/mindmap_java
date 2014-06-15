@@ -27,7 +27,7 @@ public class MapNode extends JLabel{
 	private int _count = 0;
 	private MapNode _parentNode;
 	
-	public ArrayList<MapNode>_childs = new ArrayList<MapNode>();
+	private ArrayList<MapNode>_childs = new ArrayList<MapNode>();
 	
 	/**
 	 * 
@@ -81,7 +81,6 @@ public class MapNode extends JLabel{
 		child.setParentMapNode(this);
 		_childs.add(child);
 		_count++;
-		setText(String.format("%d", _count));
 		return child;
 	}
 	/**
@@ -99,7 +98,6 @@ public class MapNode extends JLabel{
 		
 		_childs.remove(child);
 		_count--;
-		setText(String.format("%d", _count));
 		return child;
 	}
 	/**

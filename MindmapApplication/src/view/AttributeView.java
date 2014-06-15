@@ -15,7 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import model.Node;
+import model.MapNodeModel;
 
 /**
  * @Class : AttributView
@@ -97,7 +97,7 @@ public class AttributeView extends View {
 		add(changeBtn);		
 	}
 	
-	public void changeStatus(Node node){
+	public void changeStatus(MapNodeModel node){
 		if(node == null){
 			xTextField.setText("");
 			yTextField.setText("");
@@ -113,13 +113,13 @@ public class AttributeView extends View {
 		inputTextField.setText(node.getText());
 	}
 	
-	public Node getStatus(){
+	public MapNodeModel getStatus(){
 		Rectangle rect = new Rectangle();
 		rect.x = Integer.valueOf(xTextField.getText());
 		rect.y = Integer.valueOf(yTextField.getText());
 		rect.width = Integer.valueOf(widthTextField.getText());
 		rect.height = Integer.valueOf(heightTextField.getText());
-		Node newNode = new Node(rect, inputTextField.getText());
+		MapNodeModel newNode = new MapNodeModel(rect, inputTextField.getText());
 		return newNode;
 	}
 

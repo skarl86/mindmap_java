@@ -16,29 +16,40 @@ import view.MapNode;
  * @Date 		: 2014. 5. 27.
  * @Author 		: NCri
  */
-public class Node {
+public class MapNodeModel {
+	private static int _count = 0;
+	private int _id = 0;
 	
+	{
+		++_count;
+		_id = _count;
+	}
 	// Node 데이터 형태.
 	private Rectangle _bound;
 	private String _text;
-	private Node _parentNode;
+	private MapNodeModel _parentNode;
 	
-	private ArrayList<Node> _childs = new ArrayList<Node>();
+	private ArrayList<MapNodeModel> _childs = new ArrayList<MapNodeModel>();
+	public MapNodeModel(){}
 	
-	public Node(Rectangle bound, String inputText){
+	public MapNodeModel(Rectangle bound, String inputText){
 		_bound = bound;
 		_text = inputText;
 	}
 	
-	public void setParentNode(Node parent){
+	public int getID(){
+		return _id;
+	}
+	public void setParentNode(MapNodeModel parent){
 		_parentNode = parent;
 	}
 	
-	public Node getParentNode(){
+	public MapNodeModel getParentNode(){
 		return _parentNode;
 	}
 	
-	public boolean addChild(Node node){
+	public boolean addChild(MapNodeModel node){
+		node.setParentNode(this);
 		return _childs.add(node);
 	}
 	
@@ -67,7 +78,7 @@ public class Node {
 		return _childs.isEmpty();
 	}
 	
-	public ArrayList<Node> getChilds(){
+	public ArrayList<MapNodeModel> getChilds(){
 		return _childs;
 	}
 
@@ -165,5 +176,43 @@ public class Node {
 		_text = text;
 	}
 	
-	
+	public static void print(MapNodeModel root, int depth){
+		System.out.println(root.getText() + " " + depth);
+		
+		if(root.getChilds().size() == 0){
+			return;
+		}
+		
+		for(MapNodeModel child : root.getChilds()){
+			print(child, depth + 1);
+		}
+	}
+	public String printToXML(MapNodeModel root, int depth){
+		StringBuffer bf = new StringBuffer();
+		bf.append("<node>\n");
+		bf.append(String.format("<id>%d</id>\n", root.getID()));
+		
+		if(root.getParentNode() == null)
+			bf.append("<parentID>0</parentID>\n");
+		else
+			bf.append(String.format("<parentID>%d</parentID>\n",root.getParentNode().getID()));
+
+		bf.append(String.format("<depth>%d</depth>\n", depth));
+		bf.append(String.format("<x>%d</x>\n", root.getX()));
+		bf.append(String.format("<y>%d</y>\n", root.getY()));
+		bf.append(String.format("<width>%d</width>\n", root.getWidth()));
+		bf.append(String.format("<height>%d</height>\n", root.getHeight()));
+		bf.append(String.format("<text>%s</text>\n", root.getText()));
+		bf.append("</node>\n");
+		
+		if(root.getChilds().size() == 0){
+			return bf.toString();
+		}
+		
+		for(MapNodeModel child : root.getChilds()){
+			bf.append(printToXML(child, depth + 1));
+		}
+		
+		return bf.toString();
+	}
 }

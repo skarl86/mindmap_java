@@ -40,6 +40,7 @@ import javax.swing.JMenuItem;
 public class MenuBar extends JMenuBar{
 	private static int _FILE = 0;
 	
+	public static String NEW = "새로 만들기";
 	public static String OPEN = "열기";
 	public static String SAVE = "저장";
 	public static String SAVE_AS = "다른이름으로 저장";
@@ -52,6 +53,7 @@ public class MenuBar extends JMenuBar{
 		menuBar.add(fileMenu);
 		
 		ArrayList<JMenuItem> items = new ArrayList<JMenuItem>();
+		items.add(new JMenuItem(NEW));
 		items.add(new JMenuItem(OPEN));
 		items.add(new JMenuItem(SAVE));
 		items.add(new JMenuItem(SAVE_AS));

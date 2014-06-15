@@ -41,7 +41,14 @@ public class MindMapView extends View {
 
 		return node;
 	}
-
+	public void removeMapNodeAll(){
+		for (Component comp : getComponents()){
+			if (comp instanceof MapNode){
+				remove(comp);
+			}
+		}
+		repaint();
+	}
 	public void removeMapNode(MapNode view) {
 		remove(view);
 		repaint();

@@ -40,9 +40,9 @@ public class MainView extends JFrame {
 		
 		// Set Main Frame Size
 		setSize(800, 600);
-
+		setPreferredSize(new Dimension(800, 600));
 		// Not Resizable
-		setResizable(false);
+//		setResizable(false);
 		
 		// Set Title
 		setTitle("Mind Map V1.0");
@@ -81,7 +81,7 @@ public class MainView extends JFrame {
 		// init Attribute View
 		View attrView = View.getInstance(View.ATTRIBUTE, listner);
 		attrView.setBounds(attributeBounds);
-		add(attrView, BorderLayout.WEST);
+		add(attrView);
 		_views.put(View.ATTRIBUTE, attrView);
 		
 		// init MindMap View
