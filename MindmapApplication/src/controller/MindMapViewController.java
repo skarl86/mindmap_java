@@ -217,31 +217,33 @@ public class MindMapViewController extends ViewController implements
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
 			// 루트 엘리먼트
-			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("nodes");
-			doc.appendChild(rootElement);
-
+			
 			for (MapNode root : _rootList) {
+				Document doc = docBuilder.newDocument();
+				Element rootElement = doc.createElement("nodes");
+				doc.appendChild(rootElement);
+				
 				MapNodeModel rootNodeModel = _nodeMappingTable.get(root);
 				// recursiveNode(rootNodeModel, 0, doc, rootElement);
 				recursive(rootNodeModel, 0, doc, rootElement);
+				
+				// XML 파일로 쓰기
+				TransformerFactory transformerFactory = TransformerFactory
+						.newInstance();
+				Transformer transformer = transformerFactory.newTransformer();
+
+				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				DOMSource source = new DOMSource(doc);
+				StreamResult result;
+				result = new StreamResult(new FileOutputStream(file));
+
+				// 파일로 쓰지 않고 콘솔에 찍어보고 싶을 경우 다음을 사용 (디버깅용)
+				// StreamResult result = new StreamResult(System.out);
+
+				transformer.transform(source, result);
 			}
 
-			// XML 파일로 쓰기
-			TransformerFactory transformerFactory = TransformerFactory
-					.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			DOMSource source = new DOMSource(doc);
-			StreamResult result;
-			result = new StreamResult(new FileOutputStream(file));
-
-			// 파일로 쓰지 않고 콘솔에 찍어보고 싶을 경우 다음을 사용 (디버깅용)
-			// StreamResult result = new StreamResult(System.out);
-
-			transformer.transform(source, result);
 
 			_isSaved = false;
 			System.out.println("File saved!");
@@ -280,6 +282,7 @@ public class MindMapViewController extends ViewController implements
 					// Tree Model을 생성한다.
 					MapNodeModel rootNodeModel = makeMapNodeModelTree(fileNameList);
 					MapNode rootNode = makeMapNodeTree(null, rootNodeModel);
+					_rootList.add(rootNode);
 					ArrayList<MapNodeModel> modelList = makeListFromTree(null,
 							rootNodeModel);
 					ArrayList<MapNode> nodeList = makeListFromTree(null,
@@ -541,12 +544,20 @@ public class MindMapViewController extends ViewController implements
 
 	public boolean isOutOfMainBounds(Point point) {
 		boolean isOut = false;
+		
 
 		View attrView = _mainFrame.getView(View.ATTRIBUTE);
 		View toolBar = _mainFrame.getView(View.TOOL_BAR);
+		View mindView = _mainFrame.getView(View.MIND_MAP);
+		
 		Dimension attrSize = attrView.getSize();
 		Dimension toolSize = toolBar.getSize();
+		Dimension mindSize = mindView.getSize();
+		Point mindPoint = mindView.getLocation();
 
+		point.x += attrSize.width;
+		point.y += attrSize.height;
+		
 		isOut = (point.x > Toolkit.getDefaultToolkit().getScreenSize().width || point.y > Toolkit
 				.getDefaultToolkit().getScreenSize().height);
 		isOut = isOut || ((point.x >= 0 && point.x < attrSize.width));
@@ -624,6 +635,7 @@ public class MindMapViewController extends ViewController implements
 			System.out.println("새로 만들기.");
 			
 			checkSave();
+			refreshTitle("");
 			
 			// 세이브 파일 레퍼런스를 초기화.
 			_savedFile = null;
@@ -640,6 +652,7 @@ public class MindMapViewController extends ViewController implements
 				
 		} else if (MenuBar.SAVE_AS.equals(e.getActionCommand())) {
 			System.out.println("다른 이름으로 저장.");
+//			checkSave();
 			save();
 		} else if (MenuBar.CLOSE.equals(e.getActionCommand())) {
 			System.out.println("닫기.");
@@ -712,7 +725,8 @@ public class MindMapViewController extends ViewController implements
 				_selectedMapNode.setSelected(true);
 				popMenuType = PopUpMenu.TYPE_NODE_MENU2;
 			} else if (e.getSource() instanceof MindMapView) {
-				popMenuType = PopUpMenu.TYPE_NODE_MENU1;
+				if(_rootList.size() < 1)
+					popMenuType = PopUpMenu.TYPE_NODE_MENU1;
 			}
 
 			PopUpMenu pop = new PopUpMenu(popMenuType, this);
@@ -785,7 +799,24 @@ public class MindMapViewController extends ViewController implements
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
+		if (e.getSource() instanceof MapNode) {			
+			MapNode node = (MapNode) e.getSource();
+			if(isOutOfMindMapViewBounds(node.getLocation())){
+				if(node.getLocation().x < 0)
+					node.setLocation(0, node.getLocation().y);
+				
+				if(node.getLocation().y < 0)
+					node.setLocation(node.getLocation().x, 0);
+			}
+			
+			// 상태값 변경.
+			refreshStatus(node);
 
+			// 선 모양을 갱신하기 위해서.
+			MindMapView mapView = (MindMapView) _mainFrame
+					.getView(View.MIND_MAP);
+			mapView.repaint();
+		}
 	}
 
 	/*
@@ -798,26 +829,25 @@ public class MindMapViewController extends ViewController implements
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		if (!isOutOfMainBounds(new Point(e.getXOnScreen(), e.getYOnScreen()))) {
-			if (e.getSource() instanceof MapNode) {
-				int diffX = _pressedPoint.x - e.getPoint().x;
-				int diffY = _pressedPoint.y - e.getPoint().y;
+		if (e.getSource() instanceof MapNode) {			
+			MapNode node = (MapNode) e.getSource();
+			int diffX = _pressedPoint.x - e.getPoint().x;
+			int diffY = _pressedPoint.y - e.getPoint().y;
 
-				MapNode node = (MapNode) e.getSource();
-				Rectangle curBounds = node.getBounds();
-				node.setBounds(curBounds.x - diffX, curBounds.y - diffY,
-						curBounds.width, curBounds.height);
+			
+			Rectangle curBounds = node.getBounds();
+			node.setBounds(curBounds.x - diffX, curBounds.y - diffY,
+					curBounds.width, curBounds.height);
 
-				// 상태값 변경.
-				refreshStatus(node);
+			// 상태값 변경.
+			refreshStatus(node);
 
-				// 선 모양을 갱신하기 위해서.
-				MindMapView mapView = (MindMapView) _mainFrame
-						.getView(View.MIND_MAP);
-				mapView.repaint();
-			}
+			// 선 모양을 갱신하기 위해서.
+			MindMapView mapView = (MindMapView) _mainFrame
+					.getView(View.MIND_MAP);
+			mapView.repaint();
+				
 		}
-
 	}
 
 	/*
