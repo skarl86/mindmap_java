@@ -6,6 +6,7 @@
  */
 package controller;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -74,6 +75,7 @@ public class MindMapViewController extends ViewController implements
 		LEFT, RIGHT, TOP, BOTTOM
 	}
 
+	private Color[] _nodeColor = {Color.CYAN, Color.BLUE, Color.GREEN, Color.DARK_GRAY, Color.GRAY,Color.ORANGE, Color.PINK};
 	private MainView _mainFrame;
 
 	private Point _selectedNodePoint;
@@ -399,6 +401,7 @@ public class MindMapViewController extends ViewController implements
 		MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
 		MapNode newMapNode = mapView.addMapNode(root);
 		mapView.repaint();
+
 		for (MapNode child : root.getChilds())
 			drawMapNode(child);
 	}
@@ -440,6 +443,15 @@ public class MindMapViewController extends ViewController implements
 		_nodeMappingTable.put(newMapNode, newNode);
 		return newMapNode;
 	}
+	
+	public int calcurate(MapNode root, MapNode findNode, int depth){
+		if (root == findNode)
+			return depth;
+		for(MapNode child : root.getChilds()){
+			depth = calcurate(child, findNode, depth + 1);
+		}
+		return depth;
+	}
 
 	public MapNode createLinkNode(MapNode parent, Point mousePoint) {
 		System.out.println("링크 NODE 생성.");
@@ -465,10 +477,27 @@ public class MindMapViewController extends ViewController implements
 		}
 		if (isOutOfMindMapViewBounds(linkNodePoint))
 			linkNodePoint = new Point(0, 0);
-
+		
+		for(Entry<MapNode, MapNodeModel> entry : _nodeMappingTable.entrySet())
+		{
+			MapNode node = entry.getKey();
+			if(linkNodePoint.x == node.getLocation().x &&
+					linkNodePoint.y == node.getLocation().y){
+				int x = (int)(Math.random() * 100);
+				int y = (int)(Math.random() * 100);
+				linkNodePoint = new Point(x, y);
+			}
+		}
+		
+		MapNode mainRoot = _rootList.get(0);
+		
+		int depth = calcurate(mainRoot, parent, 0);
+		System.out.println(depth);
+		Color nodeColor = depth == 0 ? _nodeColor[depth] : _nodeColor[depth%_nodeColor.length];
+		
 		// Create new MapNode Object that will link to parent MapNode Object.
 		MapNode willLinkNode = createNewNode(linkNodePoint);
-
+//		willLinkNode.setBackground(nodeColor);
 		// Do Link new MapNode Object to selected MapNode Object.
 		parent.addChild(willLinkNode);
 
@@ -501,9 +530,11 @@ public class MindMapViewController extends ViewController implements
 		// If it haven't childs, remove itself.
 		if (mapNode.getChilds().size() == 0) {
 			// 부모 노드가 없다면 그건 루트다.
-			if (mapNode.getParentNode() != null)
+			if (mapNode.getParentNode() != null){
 				mapNode.getParentNode().removeChild(mapNode);
+			}
 			mapView.removeMapNode(mapNode);
+			_rootList.remove(mapNode);
 			return;
 		}
 
@@ -699,6 +730,7 @@ public class MindMapViewController extends ViewController implements
 
 		} else if (PopUpMenu.ACTION_NODE_DELETE.equals(e.getActionCommand())) {
 			removeMapNode(_selectedMapNode);
+			refreshStatus(null);
 		}
 
 	}
