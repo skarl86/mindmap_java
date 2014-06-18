@@ -16,16 +16,25 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import controller.MindMapTreeInterface;
+
 /**
  * @Class		: NodeView
  * @Date 		: 2014. 5. 26.
  * @Author 		: NCri
  */
-public class MapNode extends JLabel{
+public class MapNode extends JLabel implements MindMapTreeInterface<MapNode>{
 	
 	private final int _LIMIT_CHILDS_COUNT = 4;
 	private int _count = 0;
 	private MapNode _parentNode;
+	
+	private int _id = 0;
+	
+	{
+		++_count;
+		_id = _count;
+	}
 	
 	private ArrayList<MapNode>_childs = new ArrayList<MapNode>();
 	
@@ -44,6 +53,13 @@ public class MapNode extends JLabel{
 		setBounds(new Rectangle(point.x, point.y, 100, 50));
 		setVisible(true);
 	}
+	public void setID(int id){
+		_id = id;
+	}
+	
+	public int getID(){
+		return _id;
+	}
 	/**
 	 * 
 	 * @method Name	: setParentMapNode
@@ -52,7 +68,7 @@ public class MapNode extends JLabel{
 	 * @description :
 	 * @param parent
 	 */
-	public void setParentMapNode(MapNode parent){
+	public void setParentNode(MapNode parent){
 		_parentNode = parent;
 	}
 	/**
@@ -63,7 +79,7 @@ public class MapNode extends JLabel{
 	 * @description :
 	 * @return
 	 */
-	public MapNode getParentMapNode(){
+	public MapNode getParentNode(){
 		return _parentNode;
 	}
 	/**
@@ -78,7 +94,7 @@ public class MapNode extends JLabel{
 	public MapNode addChild(MapNode child){
 //		if(_count == _LIMIT_CHILDS_COUNT)
 //			return null;
-		child.setParentMapNode(this);
+		child.setParentNode(this);
 		_childs.add(child);
 		_count++;
 		return child;
@@ -92,13 +108,9 @@ public class MapNode extends JLabel{
 	 * @param child
 	 * @return
 	 */
-	public MapNode removeChild(MapNode child){
-		if(_count == 0)
-			return null;
-		
+	public void removeChild(MapNode child){		
 		_childs.remove(child);
 		_count--;
-		return child;
 	}
 	/**
 	 * 

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JFileChooser;
 import javax.swing.event.PopupMenuEvent;
@@ -143,6 +144,54 @@ public class MindMapViewController extends ViewController implements
 						recursiveNode(child, depth + 1, doc, rootElement);
 	}
 	
+	public void recursive(MapNodeModel root, int depth, Document doc, Element rootElement){
+		Element node = doc.createElement("node");
+		rootElement.appendChild(node);
+
+		// 속성값 정의
+		Attr attr = doc.createAttribute("id");
+		attr.setValue(String.valueOf(root.getID()));
+		node.setAttributeNode(attr);
+
+		// 속성값을 정의하는 더 쉬운 방법
+		// staff.setAttribute("id", "1");
+		
+		// parent ID 엘리먼트
+		attr = doc.createAttribute("parentID");
+		if (root.getParentNode() == null)
+			attr.setValue("0");
+		else
+			attr.setValue(String.valueOf(root.getParentNode().getID()));
+		node.setAttributeNode(attr);
+		// tree depth 엘리먼트
+		attr = doc.createAttribute("depth");
+		attr.setValue(String.valueOf(depth));
+		node.setAttributeNode(attr);
+		
+		// x 엘리먼트
+		attr = doc.createAttribute("x");
+		attr.setValue(String.valueOf(root.getX()));
+		node.setAttributeNode(attr);
+		// y 엘리멘트
+		attr = doc.createAttribute("y");
+		attr.setValue(String.valueOf(root.getY()));
+		node.setAttributeNode(attr);
+		// width 엘리멘트
+		attr = doc.createAttribute("width");
+		attr.setValue(String.valueOf(root.getWidth()));
+		node.setAttributeNode(attr);
+		// height 엘리멘트
+		attr = doc.createAttribute("height");
+		attr.setValue(String.valueOf(root.getHeight()));
+		node.setAttributeNode(attr);
+		// text 엘리멘트
+		attr = doc.createAttribute("text");
+		attr.setValue(root.getText());
+		node.setAttributeNode(attr);
+		for(MapNodeModel child : root.getChilds())
+			recursive(child, depth + 1, doc, rootElement);
+		
+	}
 	public void saveToXML(File file) {
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory
@@ -156,7 +205,8 @@ public class MindMapViewController extends ViewController implements
 
 			for(MapNode root : _rootList){
 				MapNodeModel rootNodeModel = _nodeMappingTable.get(root);
-				recursiveNode(rootNodeModel, 0, doc, rootElement);
+//				recursiveNode(rootNodeModel, 0, doc, rootElement);
+				recursive(rootNodeModel, 0, doc, rootElement);
 			}
 				
 			
@@ -220,13 +270,29 @@ public class MindMapViewController extends ViewController implements
 					// FILE_LIST엘리먼트
 					Element fileListElmnt = (Element) fileListNode;
 					// FILE 태그
-					NodeList fileNameList = fileListElmnt
-							.getElementsByTagName("node");
-					for (int j = 0; j < fileNameList.getLength(); j++) {
-						Element fileElmnt = (Element) fileNameList.item(j);
-						Node fileName = fileElmnt.getFirstChild();
-						System.out.println(fileName);
+					NodeList fileNameList = fileListElmnt.getElementsByTagName("node");
+					
+					// Tree Model을 생성한다.
+					MapNodeModel rootNodeModel = makeMapNodeModelTree(fileNameList);
+					MapNode rootNode = makeMapNodeTree(null, rootNodeModel);
+					ArrayList<MapNodeModel> modelList = makeListFromTree(null, rootNodeModel);
+					ArrayList<MapNode> nodeList = makeListFromTree(null, rootNode);
+					
+					// MapNode View와 MapNodeModel를 맵핑 시켜준다.
+					for(MapNodeModel model : modelList){
+						for(MapNode node : nodeList){
+							if(model.getID() == node.getID())
+								_nodeMappingTable.put(node, model);
+						}
 					}
+					
+					drawMapNode(rootNode);
+					
+//					for (int j = 0; j < fileNameList.getLength(); j++) {
+//						Element fileElmnt = (Element) fileNameList.item(j);
+//						Node fileName = fileElmnt.getFirstChild();
+//						System.out.println(fileName);
+//					}
 				}
 			}
 			/****************** XML 파일 파싱 END ******************/
@@ -242,7 +308,92 @@ public class MindMapViewController extends ViewController implements
 		}
 
 	}
-
+	public ArrayList makeListFromTree(ArrayList list, MindMapTreeInterface root){
+		if(list == null)
+			list = new ArrayList<MapNodeModel>();
+		list.add(root);
+		
+		for(Object child : root.getChilds()){			
+			makeListFromTree(list, (MindMapTreeInterface)child);
+		}
+		
+		return list;
+	}
+	public MapNodeModel makeMapNodeModelTree(NodeList nodeList){
+		Map<String, MapNodeModel> mappingTable = new HashMap<String, MapNodeModel>();
+		for (int j = 0; j < nodeList.getLength(); j++) {
+			Element n = (Element)nodeList.item(j);
+			
+			int id = Integer.valueOf(n.getAttribute("id"));
+			int parntID = Integer.valueOf(n.getAttribute("parentID"));
+			int x = Integer.valueOf(n.getAttribute("x"));
+			int y = Integer.valueOf(n.getAttribute("y"));
+			int width = Integer.valueOf(n.getAttribute("width"));
+			int height = Integer.valueOf(n.getAttribute("height"));
+			String text = n.getAttribute("text");
+			
+			MapNodeModel newModel = new MapNodeModel();
+			newModel.setID(id);
+			newModel.setX(x);
+			newModel.setY(y);
+			newModel.setWidth(width);
+			newModel.setHeight(height);
+			newModel.setText(text);
+			
+			if(mappingTable.get(String.valueOf(parntID)) == null)
+				mappingTable.put(String.valueOf(id), newModel);
+			else
+			{
+				MapNodeModel parent = mappingTable.get(String.valueOf(parntID));
+				parent.addChild(newModel);
+				newModel.setParentNode(parent);
+				mappingTable.put(String.valueOf(id), newModel);
+			}
+		}
+		
+		// Root Node의 parent ID값은 0.
+		for (Entry<String, MapNodeModel> entry : mappingTable.entrySet()){
+			MapNodeModel node = entry.getValue();
+			if(node.getParentNode() == null)
+				return node;
+		}
+		return null;
+	}
+	public MapNode makeMapNodeTree(Map<MapNodeModel, MapNode> mappingTable, MapNodeModel root){
+		MapNode mainRoot = null;
+		
+		MapNode newNode = new MapNode(root.getBounds().getLocation());
+		newNode.setID(root.getID());
+		newNode.setBounds(root.getBounds());
+		newNode.setText(root.getText());
+		
+		if(root.getParentNode() == null)
+			mainRoot = newNode;
+		
+		if(mappingTable == null)
+			mappingTable = new HashMap<MapNodeModel, MapNode>();
+		
+		mappingTable.put(root, newNode);
+		
+		MapNode parent = mappingTable.get(root.getParentNode());
+		
+		if (parent != null){
+			newNode.setParentNode(parent);
+			parent.addChild(newNode);	
+		}
+		
+		for(MapNodeModel node : root.getChilds())
+			makeMapNodeTree( mappingTable ,node);
+		
+		return mainRoot;
+	}
+	public void drawMapNode(MapNode root){
+		MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
+		MapNode newMapNode = mapView.addMapNode(root);
+		mapView.repaint();
+		for(MapNode child : root.getChilds())
+			drawMapNode(child);
+	}
 	public MapNode createNewNode(Point newNodePoint) {
 		System.out.println("새로운 NODE를 생성.");
 		MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
@@ -257,23 +408,23 @@ public class MindMapViewController extends ViewController implements
 		return newMapNode;
 	}
 
-	public void createLinkNode(MapNode parent, LinkPoint point) {
+	public MapNode createLinkNode(MapNode parent, LinkPoint point) {
 		System.out.println("링크 NODE 생성.");
 
-		Point linkNodePoint = _selectedMapNode.getLocation();
+		Point linkNodePoint = parent.getLocation();
 
 		switch (point) {
 		case LEFT:
-			linkNodePoint.x -= _selectedMapNode.getBounds().width * 1.5;
+			linkNodePoint.x -= parent.getBounds().width * 1.5;
 			break;
 		case RIGHT:
-			linkNodePoint.x += _selectedMapNode.getBounds().width * 1.5;
+			linkNodePoint.x += parent.getBounds().width * 1.5;
 			break;
 		case TOP:
-			linkNodePoint.y -= _selectedMapNode.getBounds().height * 2;
+			linkNodePoint.y -= parent.getBounds().height * 2;
 			break;
 		case BOTTOM:
-			linkNodePoint.y += _selectedMapNode.getBounds().height * 2;
+			linkNodePoint.y += parent.getBounds().height * 2;
 			break;
 		default:
 			break;
@@ -283,16 +434,17 @@ public class MindMapViewController extends ViewController implements
 		MapNode willLinkNode = createNewNode(linkNodePoint);
 
 		// Do Link new MapNode Object to selected MapNode Object.
-		_selectedMapNode.addChild(willLinkNode);
+		parent.addChild(willLinkNode);
 
 		// MapNode View에 해당하는 Model 객체도 동기화 시켜준다.
 		MapNodeModel newNode = _nodeMappingTable.get(willLinkNode);
 		MapNodeModel selectedMapNodeModel = _nodeMappingTable
-				.get(_selectedMapNode);
+				.get(parent);
 		selectedMapNodeModel.addChild(newNode);
 
 		// TEST Code.
 		willLinkNode.setBackground(Color.BLUE);
+		return willLinkNode;
 	}
 
 	public void removeMapNodeAll() {
@@ -314,8 +466,8 @@ public class MindMapViewController extends ViewController implements
 		// If it haven't childs, remove itself.
 		if (mapNode.getChilds().size() == 0) {
 			// 부모 노드가 없다면 그건 루트다.
-			if (mapNode.getParentMapNode() != null)
-				mapNode.getParentMapNode().removeChild(mapNode);
+			if (mapNode.getParentNode() != null)
+				mapNode.getParentNode().removeChild(mapNode);
 			mapView.removeMapNode(mapNode);
 			return;
 		}
@@ -329,8 +481,8 @@ public class MindMapViewController extends ViewController implements
 		}
 
 		mapView.removeMapNode(mapNode);
-		if (mapNode.getParentMapNode() != null)
-			mapNode.getParentMapNode().removeChild(mapNode);
+		if (mapNode.getParentNode() != null)
+			mapNode.getParentNode().removeChild(mapNode);
 	}
 
 	public void refreshStatus(MapNode selectedNode) {

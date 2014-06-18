@@ -30,16 +30,20 @@ public class MindMapView extends View {
 		addMouseMotionListener((MouseMotionListener) listner);
 		setVisible(true);
 	}
-
-	public MapNode addMapNode(Point point) {
-		MapNode node = new MapNode(point);
-		node.addMouseMotionListener((MouseMotionListener) _listner);
-		node.addMouseListener((MouseListener) _listner);
-		add(node);
+	public MapNode addMapNode(MapNode newNode){
+		newNode.addMouseMotionListener((MouseMotionListener) _listner);
+		newNode.addMouseListener((MouseListener) _listner);
+		add(newNode);
 
 		repaint();
+		
+		return newNode;
 
-		return node;
+	}
+	public MapNode addMapNode(Point point) {
+		MapNode node = new MapNode(point);
+		
+		return this.addMapNode(node);
 	}
 	public void removeMapNodeAll(){
 		for (Component comp : getComponents()){

@@ -9,6 +9,7 @@ package model;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
+import controller.MindMapTreeInterface;
 import view.MapNode;
 
 /**
@@ -16,7 +17,7 @@ import view.MapNode;
  * @Date 		: 2014. 5. 27.
  * @Author 		: NCri
  */
-public class MapNodeModel {
+public class MapNodeModel implements MindMapTreeInterface<MapNodeModel>{
 	private static int _count = 0;
 	private int _id = 0;
 	
@@ -30,13 +31,18 @@ public class MapNodeModel {
 	private MapNodeModel _parentNode;
 	
 	private ArrayList<MapNodeModel> _childs = new ArrayList<MapNodeModel>();
-	public MapNodeModel(){}
+	public MapNodeModel(){
+		_bound = new Rectangle();
+	}
 	
 	public MapNodeModel(Rectangle bound, String inputText){
 		_bound = bound;
 		_text = inputText;
 	}
 	
+	public void setID(int id){
+		_id = id;
+	}
 	public int getID(){
 		return _id;
 	}
@@ -48,9 +54,10 @@ public class MapNodeModel {
 		return _parentNode;
 	}
 	
-	public boolean addChild(MapNodeModel node){
+	public MapNodeModel addChild(MapNodeModel node){
+		_childs.add(node);
 		node.setParentNode(this);
-		return _childs.add(node);
+		return node;
 	}
 	
 	/**
@@ -62,8 +69,8 @@ public class MapNodeModel {
 	 * @param node
 	 * @return
 	 */
-	public boolean removeChild(MapNode node){
-		return _childs.remove(node);
+	public void removeChild(MapNodeModel node){
+		_childs.remove(node);
 	}
 	
 	/**
@@ -186,33 +193,5 @@ public class MapNodeModel {
 		for(MapNodeModel child : root.getChilds()){
 			print(child, depth + 1);
 		}
-	}
-	public String printToXML(MapNodeModel root, int depth){
-		StringBuffer bf = new StringBuffer();
-		bf.append("<node>\n");
-		bf.append(String.format("<id>%d</id>\n", root.getID()));
-		
-		if(root.getParentNode() == null)
-			bf.append("<parentID>0</parentID>\n");
-		else
-			bf.append(String.format("<parentID>%d</parentID>\n",root.getParentNode().getID()));
-
-		bf.append(String.format("<depth>%d</depth>\n", depth));
-		bf.append(String.format("<x>%d</x>\n", root.getX()));
-		bf.append(String.format("<y>%d</y>\n", root.getY()));
-		bf.append(String.format("<width>%d</width>\n", root.getWidth()));
-		bf.append(String.format("<height>%d</height>\n", root.getHeight()));
-		bf.append(String.format("<text>%s</text>\n", root.getText()));
-		bf.append("</node>\n");
-		
-		if(root.getChilds().size() == 0){
-			return bf.toString();
-		}
-		
-		for(MapNodeModel child : root.getChilds()){
-			bf.append(printToXML(child, depth + 1));
-		}
-		
-		return bf.toString();
 	}
 }
