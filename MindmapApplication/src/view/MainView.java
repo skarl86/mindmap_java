@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
 import controller.action.MenuAction;
@@ -41,6 +42,7 @@ public class MainView extends JFrame {
 		// Set Main Frame Size
 		setSize(800, 600);
 		setPreferredSize(new Dimension(800, 600));
+		setMaximumSize(new Dimension(1024, 768));
 		// Not Resizable
 //		setResizable(false);
 		
@@ -55,7 +57,7 @@ public class MainView extends JFrame {
 		
 		// Set Layout
 		// Layout 을 수동으로 처리 하기 위해서.
-		setLayout(null);
+		setLayout(new BorderLayout());
 
 		// Set Bounds of All View		
 		// 가독성을 위해서 변수로 접근.
@@ -81,14 +83,21 @@ public class MainView extends JFrame {
 		// init Attribute View
 		View attrView = View.getInstance(View.ATTRIBUTE, listner);
 		attrView.setBounds(attributeBounds);
-		add(attrView);
+		attrView.setPreferredSize(attributeBounds.getSize());
+		add(attrView, BorderLayout.WEST);
 		_views.put(View.ATTRIBUTE, attrView);
 		
 		// init MindMap View
 		View mindMapView = View.getInstance(View.MIND_MAP, listner);
 		mindMapView.setBackground(Color.LIGHT_GRAY);
+		mindMapView.setMaximumSize(this.getMaximumSize());
+		mindMapView.setPreferredSize(this.getMaximumSize());
 		mindMapView.setBounds(mindMapBounds);
-		add(mindMapView);
+		JScrollPane scroll = new JScrollPane();
+		scroll.setSize(this.getMaximumSize());
+		scroll.setPreferredSize(this.getMaximumSize());
+		scroll.setViewportView(mindMapView);
+		add(scroll, BorderLayout.CENTER);
 		_views.put(View.MIND_MAP, mindMapView);
 		
 		// Set Attribute

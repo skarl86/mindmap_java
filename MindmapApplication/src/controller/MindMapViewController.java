@@ -8,8 +8,10 @@ package controller;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -72,6 +74,8 @@ public class MindMapViewController extends ViewController implements
 
 	private Point _selectedNodePoint;
 	private Point _pressedPoint;
+	// 팝메뉴를 실행했을 때 위치값.
+	private Point _menuPoint;
 
 	// 마인드 맵의 Root 노드들을 가지고 있는 리스트.
 	private ArrayList<MapNode> _rootList = new ArrayList<MapNode>();
@@ -89,6 +93,10 @@ public class MindMapViewController extends ViewController implements
 			System.out.println(comp);
 	}
 
+	public static void main(String[] args) {
+		ViewController vc = ViewController.getInstance(MIND_MAP);
+	}
+	
 	public void recursiveNode(MapNodeModel root, int depth, Document doc, Element rootElement){
 		// node 엘리먼트
 					Element node = doc.createElement("node");
@@ -394,6 +402,28 @@ public class MindMapViewController extends ViewController implements
 		for(MapNode child : root.getChilds())
 			drawMapNode(child);
 	}
+	public LinkPoint getPointOnLinkNode(Dimension size, Point point){
+		int cx = size.width / 2;
+		int cy = size.height / 2;
+		
+		int diffX = cx - point.x;
+		int diffY = cy - point.y;
+		
+		LinkPoint answer = LinkPoint.TOP;
+		
+		if(diffX < 0 && Math.abs(diffX) > Math.abs(diffY)){
+			answer = LinkPoint.RIGHT;
+		}else if(diffX > 0 && Math.abs(diffX) > Math.abs(diffY)){
+			answer = LinkPoint.LEFT;
+		}else if(diffY < 0 && Math.abs(diffX) < Math.abs(diffY)){
+			answer = LinkPoint.BOTTOM;
+		}else if (diffY > 0 && Math.abs(diffX) < Math.abs(diffY)){
+			answer = LinkPoint.TOP;
+		}
+		
+		return answer;
+		
+	}
 	public MapNode createNewNode(Point newNodePoint) {
 		System.out.println("새로운 NODE를 생성.");
 		MindMapView mapView = (MindMapView) _mainFrame.getView(View.MIND_MAP);
@@ -408,13 +438,14 @@ public class MindMapViewController extends ViewController implements
 		return newMapNode;
 	}
 
-	public MapNode createLinkNode(MapNode parent, LinkPoint point) {
+	public MapNode createLinkNode(MapNode parent, Point mousePoint) {
 		System.out.println("링크 NODE 생성.");
 
+		LinkPoint where = getPointOnLinkNode(parent.getSize(), mousePoint);
+		
 		Point linkNodePoint = parent.getLocation();
-
-		switch (point) {
-		case LEFT:
+		switch (where) {
+		case LEFT:			
 			linkNodePoint.x -= parent.getBounds().width * 1.5;
 			break;
 		case RIGHT:
@@ -429,7 +460,9 @@ public class MindMapViewController extends ViewController implements
 		default:
 			break;
 		}
-
+		if(isOutOfMindMapViewBounds(linkNodePoint))
+			linkNodePoint = new Point(0, 0);
+		
 		// Create new MapNode Object that will link to parent MapNode Object.
 		MapNode willLinkNode = createNewNode(linkNodePoint);
 
@@ -443,7 +476,7 @@ public class MindMapViewController extends ViewController implements
 		selectedMapNodeModel.addChild(newNode);
 
 		// TEST Code.
-		willLinkNode.setBackground(Color.BLUE);
+//		willLinkNode.setBackground(Color.BLUE);
 		return willLinkNode;
 	}
 
@@ -499,10 +532,25 @@ public class MindMapViewController extends ViewController implements
 		changedNode.setText(selectedNode.getText());
 		attrView.changeStatus(changedNode);
 	}
-
-	public static void main(String[] args) {
-		ViewController vc = ViewController.getInstance(MIND_MAP);
+	public boolean isOutOfMindMapViewBounds(Point point){
+		boolean isOut = false;
+		isOut = (point.x < 0 || point.y < 0);
+		return isOut;
 	}
+	public boolean isOutOfMainBounds(Point point){
+		boolean isOut = false;
+		
+		View attrView = _mainFrame.getView(View.ATTRIBUTE);
+		View toolBar = _mainFrame.getView(View.TOOL_BAR);
+		Dimension attrSize = attrView.getSize();
+		Dimension toolSize = toolBar.getSize();
+		
+		isOut = (point.x > Toolkit.getDefaultToolkit().getScreenSize().width || 
+				point.y > Toolkit.getDefaultToolkit().getScreenSize().height);
+		isOut = isOut || ( (point.x >= 0 && point.x < attrSize.width));
+		isOut = isOut || (point.y < toolSize.height + 100);
+		return isOut;
+	}	
 
 	/*
 	 * 踰꾪듉 �≪뀡 �대깽�몃� �꾨떖 諛쏅뒗��
@@ -588,7 +636,7 @@ public class MindMapViewController extends ViewController implements
 		} else if (PopUpMenu.ACTION_NODE_LINK_CREATE.equals(e
 				.getActionCommand())) {
 			System.out.println(e.getSource());
-			createLinkNode(_selectedMapNode, LinkPoint.TOP);
+			createLinkNode(_selectedMapNode, _menuPoint);
 
 		} else if (PopUpMenu.ACTION_NODE_DELETE.equals(e.getActionCommand())) {
 			removeMapNode(_selectedMapNode);
@@ -611,6 +659,7 @@ public class MindMapViewController extends ViewController implements
 			System.out.println(e.getSource());
 			int popMenuType = -1;
 			if (e.getSource() instanceof MapNode) {
+				_menuPoint = e.getPoint();
 				if (_selectedMapNode != null)
 					_selectedMapNode.setSelected(false);
 				_selectedMapNode = (MapNode) e.getSource();
@@ -703,23 +752,26 @@ public class MindMapViewController extends ViewController implements
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		if (e.getSource() instanceof MapNode) {
-			int diffX = _pressedPoint.x - e.getPoint().x;
-			int diffY = _pressedPoint.y - e.getPoint().y;
+		if(!isOutOfMainBounds(new Point(e.getXOnScreen(), e.getYOnScreen()))){
+			if (e.getSource() instanceof MapNode) {
+				int diffX = _pressedPoint.x - e.getPoint().x;
+				int diffY = _pressedPoint.y - e.getPoint().y;
 
-			MapNode node = (MapNode) e.getSource();
-			Rectangle curBounds = node.getBounds();
-			node.setBounds(curBounds.x - diffX, curBounds.y - diffY,
-					curBounds.width, curBounds.height);
+				MapNode node = (MapNode) e.getSource();
+				Rectangle curBounds = node.getBounds();
+				node.setBounds(curBounds.x - diffX, curBounds.y - diffY,
+						curBounds.width, curBounds.height);
 
-			// 상태값 변경.
-			refreshStatus(node);
+				// 상태값 변경.
+				refreshStatus(node);
 
-			// 선 모양을 갱신하기 위해서.
-			MindMapView mapView = (MindMapView) _mainFrame
-					.getView(View.MIND_MAP);
-			mapView.repaint();
+				// 선 모양을 갱신하기 위해서.
+				MindMapView mapView = (MindMapView) _mainFrame
+						.getView(View.MIND_MAP);
+				mapView.repaint();
+			}	
 		}
+		
 	}
 
 	/*
