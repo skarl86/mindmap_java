@@ -43,6 +43,7 @@ public class MainView extends JFrame {
 		setSize(800, 600);
 		setPreferredSize(new Dimension(800, 600));
 		setMaximumSize(new Dimension(1024, 768));
+		
 		// Not Resizable
 //		setResizable(false);
 		
